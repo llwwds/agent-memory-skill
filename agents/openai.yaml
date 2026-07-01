@@ -1,0 +1,7 @@
+interface:
+  display_name: "Agent Memory Skill"
+  short_description: "SQLite-based memory system with multi-value tag indexing"
+  default_prompt: "Use $agent-memory-skill to search and manage memories across conversations, events, persona, and tools."
+  brand_color: "#3B82F6"
+policy:
+  allow_implicit_invocation: true
