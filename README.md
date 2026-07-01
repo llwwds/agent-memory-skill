@@ -127,6 +127,10 @@ agent-memory-skill/
 │   └── schema.md         # SQL Schema 完整参考
 └── agents/
     └── openai.yaml       # Agent 接口配置
+├── docs/                # 项目文档
+│   ├── todos.md          # 待办事项和待设计问题
+│   └── issues/           # 问题记录
+│       └── agent-write.md # Agent 写入问题记录
 `
 
 ## 数据存储位置
@@ -138,3 +142,4 @@ agent-memory-skill/
 ## License
 
 MIT
+
