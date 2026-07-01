@@ -1,4 +1,4 @@
-﻿# Agent Memory Skill
+# Agent Memory Skill
 
 分层长期记忆系统 — 管理 4 个 SQLite 数据库，基于多值标签进行精确索引和交叉搜索。
 
@@ -128,7 +128,7 @@ agent-memory-skill/
 └── agents/
     └── openai.yaml       # Agent 接口配置
 ├── docs/                # 项目文档
-│   ├── todos.md          # 待办事项和待设计问题
+│   ├── backlog.md         # 项目 backlog（下一步开发待办）
 │   └── issues/           # 问题记录
 │       └── agent-write.md # Agent 写入问题记录
 `
