@@ -128,9 +128,10 @@ agent-memory-skill/
 └── agents/
     └── openai.yaml       # Agent 接口配置
 ├── docs/                # 项目文档
-│   ├── backlog.md         # 项目 backlog（下一步开发待办）
+│   ├── todo/             # 下一步规划
+│   │   ├── todos.md      # 宏观规划和 idea 收集
+│   │   └── backlog.md    # 详细问题报告
 │   └── issues/           # 问题记录
-│       └── agent-write.md # Agent 写入问题记录
 `
 
 ## 数据存储位置
