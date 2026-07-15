@@ -6,6 +6,13 @@ from db_utils import (DB_FILES, get_conn, now_iso, is_multi_value,
 
 SKIP_COLS = {"__table__"}
 
+TEXT_COLS = {
+    "conversations": ["content", "summary"],
+    "events": ["overview", "name"],
+    "persona": ["content", "key"],
+    "tools": ["overview", "usage_guide", "tech_manual", "name"],
+}
+
 def list_tags(db_name, column_name):
     conn = get_conn(db_name)
     rows = conn.execute(
@@ -31,9 +38,10 @@ def query_rows(db_name, filters, order_by, limit, offset, content_like=None):
     params = []
 
     if content_like:
-        where_parts.append("(content LIKE ? OR summary LIKE ? OR overview LIKE ?)")
+        text_cols = TEXT_COLS[db_name]
+        where_parts.append("(" + " OR ".join(f"{col} LIKE ?" for col in text_cols) + ")")
         like_val = f"%{content_like}%"
-        params.extend([like_val, like_val, like_val])
+        params.extend([like_val] * len(text_cols))
 
     for col, val in filters.items():
         if col in SKIP_COLS:

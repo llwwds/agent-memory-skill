@@ -4,7 +4,10 @@ import json
 import os
 from datetime import datetime, timezone
 
-DB_BASE = r"C:\llwwds_file\memory"
+DEFAULT_DB_BASE = r"C:\llwwds_file\memory" if os.name == "nt" else "~/Documents/memory"
+DB_BASE = os.path.abspath(os.path.expanduser(
+    os.environ.get("AGENT_MEMORY_DB_DIR", DEFAULT_DB_BASE)
+))
 
 DB_FILES = {
     "conversations": os.path.join(DB_BASE, "conversations.db"),

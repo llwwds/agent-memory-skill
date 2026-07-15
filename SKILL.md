@@ -12,10 +12,12 @@ metadata:
 
 管理 4 个 SQLite 数据库，提供记忆的读写和六种检索策略。
 
+数据库目录可通过 `AGENT_MEMORY_DB_DIR` 覆盖。未设置时，Windows 使用 `C:\llwwds_file\memory\`，macOS/Linux 使用 `~/Documents/memory/`。
+
 ## 数据库路径
 
 ```
-C:\llwwds_file\memory\
+<AGENT_MEMORY_DB_DIR 或系统默认目录>/
 ├── conversations.db   原始对话记录
 ├── events.db          事件（每个事件标签一条记录）
 ├── persona.db         用户画像（身份/偏好/目标/项目）

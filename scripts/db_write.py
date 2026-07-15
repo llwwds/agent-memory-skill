@@ -8,6 +8,9 @@ def insert_row(db_name, data_json):
     conn = get_conn(db_name)
     data = json.loads(data_json)
     data.pop("id", None)
+    timestamp = now_iso()
+    data.setdefault("created_at", timestamp)
+    data.setdefault("updated_at", data["created_at"])
     cols = list(data.keys())
     values = []
     for col in cols:
