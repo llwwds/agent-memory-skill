@@ -34,6 +34,18 @@ flowchart LR
     W --> C & E & P & T
 ```
 
+## 设计理念：为什么封装成 Skill 而不是做成 Plugin
+
+这个项目刻意封装成 skill，而不是做成 plugin。核心理由只有一句：
+
+> 都是封装，skill 更容易同时兼容 Codex 和 Claude，开发和测试花的 token 一般更少。
+
+展开说：
+
+- **封装的目标是整个 workflow，不是打磨 prompt。** 前期探索和总结创新真正需要优化的是流程（什么时候查标签池、什么时候拉画像、什么时候写回），把这套流程连同 schema、CLI 一起封装成 skill，目的就达到了。继续往 plugin 方向堆功能，往往是在打磨 prompt 措辞，收益递减。
+- **一套文件，两端通用。** skill 的入口是 `SKILL.md` 加脚本，Codex 和 Claude 都能直接加载同一份目录；plugin 通常要绑定某一端的运行时和配置格式，跨端时容易被迫维护两套。
+- **简单优先。** 除非出现新的、skill 表达不了的需求，否则都以简单优先——能靠几个 Python 脚本 + 一份 schema 解决，就不引入额外运行时。
+
 ## 特性
 
 - 仅依赖 Python 标准库，核心数据存放在本地 SQLite。
@@ -82,6 +94,38 @@ python scripts/db_init.py
 ```
 
 重启 Codex 后可通过 `$agent-memory-skill` 显式调用。`SKILL.md` 同时定义了每次对话开始和结束时的记忆工作流。
+
+## 如何在系统提示词里加几句话以实现自动化
+
+显式调用 `$agent-memory-skill` 需要你每次记得敲一遍。更省事的做法是在系统提示词（或 Codex 的全局 AGENTS.md / Claude 的 CLAUDE.md）里加几句规则，让 Agent 在固定时机自动跑记忆脚本，无需人工触发。
+
+`agents/openai.yaml` 里已经设了 `allow_implicit_invocation: true`，意味着 Agent 可以隐式调用本 skill；下面这几句话只是把"什么时候该调用"讲清楚，让自动化稳定发生。
+
+把下面这段直接粘进系统提示词即可（脚本路径用相对 `scripts/...`，依赖 skill 目录被正确加载）：
+
+```text
+长期记忆规则：
+- 对话开始时，先查标签池再拉上下文：
+  1. python scripts/db_query.py --db events --list-tags --column name
+  2. python scripts/db_query.py --db persona --limit 50
+  3. 按当前话题，从 A-F 中选 1-2 个检索脚本拉相关历史。
+- 对话结束前，把本次要点写回：
+  1. python scripts/db_write.py --db conversations --action insert --data <JSON>
+  2. 若有进展，更新 events 的 overview/milestones。
+  3. 若涉及工具链变更，更新 tools 表 status。
+- 任何删除只走软删除（status 改为 不存在），不物理删除。
+- 读写前先 --list-tags 查标签池，复用已有标签，不要新建近义标签。
+```
+
+这几句话为什么够用：
+
+| 规则 | 对应的自动化效果 |
+| --- | --- |
+| 对话开始时查标签池 + 拉画像 | Agent 每次开机就拿到"有哪些事件/项目""用户是谁"，不用你手动喂上下文 |
+| 结束时写回 conversations + 更新 events/tools | 每轮对话自动沉淀，记忆持续累积，不会漏记 |
+| 只走软删除 + 先查标签池 | 防止 Agent 误删原始数据，也防止它把同一概念写成多个近义标签污染索引 |
+
+如果你的系统提示词对 token 敏感，可以只保留"对话开始时查标签池+拉上下文"和"对话结束时写 conversations"这两条——它们是自动化的最小闭环；其余规则可留在 `SKILL.md` 里作为 skill 自带说明，Agent 调用 skill 时会读到。
 
 ## 常用操作
 
